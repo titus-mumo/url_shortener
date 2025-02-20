@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>URL Shortener</title>
+  </head>
+  <body>
+    <div id="notification" class="notification hidden">Link copied!</div>
+    <div class="container">
+      <h2>Shorten Your URL</h2>
+      <form id="urlForm">
+        <input type="text" id="urlInput" placeholder="Enter URL" required />
+        <button type="submit">Shorten</button>
+      </form>
+
+      <div id="result-container">
+        <span id="result"></span>
+        <button class="copy-icon" onclick="copyToClipboard()" title="Copy">
+          📋
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let url = "";
+      async function handleSubmitForm(event) {
+        event.preventDefault();
+        const urlInput = document.getElementById("urlInput").value;
+        const resultElement = document.getElementById("result");
+        const resultContainer = document.getElementById("result-container");
+
+        try {
+          const response = await fetch("http://localhost:8080/short", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ originalUrl: urlInput }),
+          });
+
+          if (!response.ok) throw new Error("Failed to shorten URL");
+
+          const data = await response.json();
+          resultElement.innerHTML = `<a id="shortenedUrl" href="short/${data.shortenedUrl}" target="_blank">${data.shortenedUrl}</a>`;
+          resultContainer.style.visibility = "visible";
+        } catch (error) {
+          resultElement.innerHTML = "Error: " + error.message;
+          resultContainer.style.visibility = "visible";
+        }
+      }
+
+      function copyToClipboard() {
+        const url = document.querySelector("#shortenedUrl").href;
+        navigator.clipboard.writeText(url).then(() => {
+          const notification = document.getElementById("notification");
+          notification.classList.remove("hidden");
+          setTimeout(() => {
+            notification.classList.add("hidden");
+          }, 1500);
+        });
+      }
+
+      document
+        .getElementById("urlForm")
+        .addEventListener("submit", handleSubmitForm);
+    </script>
+  </body>
+</html>

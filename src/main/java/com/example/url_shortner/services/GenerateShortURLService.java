@@ -21,7 +21,6 @@ public class GenerateShortURLService {
     private static final Random RANDOM = new SecureRandom();
 
     public String generateUniqueShortId() {
-        // TODO: Figure out here
         String newId;
         do {
             newId = generateRandomString();
